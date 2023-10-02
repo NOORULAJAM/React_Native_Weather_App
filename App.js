@@ -10,39 +10,40 @@ import {
 import React, {useState} from 'react';
 import {API, API_KEY} from './utills/utilts';
 import LottieView from 'lottie-react-native';
+import Toast from 'react-native-toast-message';
 import axios from 'axios';
 
 const App = () => {
   const [search, setsearch] = useState('');
-  const [temp, settemp] = useState('');
-  const [mintemp, setmintemp] = useState('');
-  const [maxtemp, setmaxtemp] = useState('');
-  const [feellike, setfeellike] = useState('');
-  const [humidity, sethumidity] = useState('');
-  const [pressure, setpressure] = useState('');
+  const [ApiData, setApiData] = useState('');
   const [loader, setloader] = useState(true);
 
   const Find_Location = async () => {
-    const url = await axios(`${API}${search}&units=metric&appid=${API_KEY}`);
-    settemp(url.data.main.temp);
-    setmintemp(url.data.main.temp_min);
-    setmaxtemp(url.data.main.temp_max);
-    setfeellike(url.data.main.feels_like);
-    sethumidity(url.data.main.humidity);
-    setpressure(url.data.main.pressure);
-    Keyboard.dismiss();
-    setloader(false);
+    const url = await axios
+      .get(`${API}${search}&units=metric&appid=${API_KEY}`)
+      .then(function (response) {
+        setApiData(url.data.main);
+        Keyboard.dismiss();
+        setloader(false);
+      })
+      .catch(function (error) {
+        console.log('Errorrryyyy', error);
+        Toast.show({
+          type: 'error',
+          position: 'bottom',
+          text1: 'Error',
+          text2: 'Records not found.',
+          visibilityTime: 4000,
+          autoHide: true,
+          topOffset: 30,
+          bottomOffset: 40,
+        });
+      });
   };
 
   const Reset = () => {
     setloader(true);
     setsearch('');
-    settemp('');
-    setmintemp('');
-    setmaxtemp('');
-    setfeellike('');
-    sethumidity('');
-    setpressure('');
   };
 
   return (
@@ -87,11 +88,12 @@ const App = () => {
               autoPlay
               loop
             />
+            <Toast />
           </View>
         ) : (
           <View style={{flex: 1, marginTop: '20%', alignItems: 'center'}}>
             <Text style={{color: 'white', fontWeight: 'bold', fontSize: 55}}>
-              {temp}°C
+              {ApiData.temp}°C
             </Text>
             <Text style={{color: 'white', fontWeight: 'bold', fontSize: 55}}>
               {search}
@@ -106,7 +108,7 @@ const App = () => {
               <View style={{flexDirection: 'column', alignItems: 'center'}}>
                 <Text
                   style={{color: 'white', fontWeight: 'bold', fontSize: 20}}>
-                  {mintemp}°C
+                  {ApiData.temp_min}°C
                 </Text>
                 <Text
                   style={{color: 'white', fontWeight: 'bold', fontSize: 20}}>
@@ -116,7 +118,7 @@ const App = () => {
               <View style={{flexDirection: 'column', alignItems: 'center'}}>
                 <Text
                   style={{color: 'white', fontWeight: 'bold', fontSize: 20}}>
-                  {maxtemp}°C
+                  {ApiData.temp_max}°C
                 </Text>
                 <Text
                   style={{color: 'white', fontWeight: 'bold', fontSize: 20}}>
@@ -143,7 +145,7 @@ const App = () => {
                 />
                 <Text
                   style={{color: 'white', fontWeight: 'bold', fontSize: 18}}>
-                  {humidity}
+                  {ApiData.humidity}
                 </Text>
               </View>
               <View style={{alignItems: 'center'}}>
@@ -153,7 +155,7 @@ const App = () => {
                 />
                 <Text
                   style={{color: 'white', fontWeight: 'bold', fontSize: 18}}>
-                  {pressure}
+                  {ApiData.pressure}
                 </Text>
               </View>
               <View style={{alignItems: 'center'}}>
@@ -168,7 +170,7 @@ const App = () => {
                 />
                 <Text
                   style={{color: 'white', fontWeight: 'bold', fontSize: 18}}>
-                  {feellike}
+                  {ApiData.feels_like}
                 </Text>
               </View>
             </View>
